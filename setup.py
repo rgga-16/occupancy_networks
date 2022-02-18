@@ -107,5 +107,6 @@ setup(
     ext_modules=cythonize(ext_modules),
     cmdclass={
         'build_ext': BuildExtension
-    }
+    },
+    include_dirs=[numpy_include_dir]
 )
