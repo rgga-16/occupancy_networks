@@ -1,0 +1,4 @@
+
+when running 'python setup.py build_ext --inplace'
+if you encounter the error 'undefined symbol: cblas_sgemm_alloc', run the following;
+conda install -c anaconda mkl

@@ -206,7 +206,8 @@ class ImageDataset(data.Dataset):
         ]
         self.len = len(self.file_list)
         self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((self.img_size,self.img_size)),
+            # transforms.Resize((224, 224)),
             transforms.ToTensor()
         ])
         self.return_idx = return_idx

@@ -113,16 +113,18 @@ class DecoderCBatchNorm(nn.Module):
             self.actvn = lambda x: F.leaky_relu(x, 0.2)
 
     def forward(self, p, z, c, **kwargs):
-        p = p.transpose(1, 2)
+
+        # bs=batch size, D = no. of points, T = point dimension (usually 3)
+        p = p.transpose(1, 2) #p(bs,D,T) => p(bs,T,D)
         batch_size, D, T = p.size()
-        net = self.fc_p(p)
+        net = self.fc_p(p) #p(bs,T,D) => net(1,hidden_dim,D)
 
         if self.z_dim != 0:
             net_z = self.fc_z(z).unsqueeze(2)
             net = net + net_z
 
-        net = self.block0(net, c)
-        net = self.block1(net, c)
+        net = self.block0(net, c) #net(1,hidden_dim,D), c(1,256)=> net(1,hidden_dim,D)
+        net = self.block1(net, c) 
         net = self.block2(net, c)
         net = self.block3(net, c)
         net = self.block4(net, c)

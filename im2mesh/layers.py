@@ -48,7 +48,7 @@ class ResnetBlockFC(nn.Module):
         return x_s + dx
 
 
-class CResnetBlockConv1d(nn.Module):
+class   CResnetBlockConv1d(nn.Module):
     ''' Conditional batch normalization-based Resnet block class.
 
     Args:
@@ -72,6 +72,7 @@ class CResnetBlockConv1d(nn.Module):
         self.size_in = size_in
         self.size_h = size_h
         self.size_out = size_out
+        self.c_dim = c_dim
         # Submodules
         if not legacy:
             self.bn_0 = CBatchNorm1d(

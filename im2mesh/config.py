@@ -116,28 +116,36 @@ def get_dataset(mode, cfg, return_idx=False, return_category=False):
         cfg (dict): config dictionary
         return_idx (bool): whether to include an ID field
     '''
-    method = cfg['method']
-    dataset_type = cfg['data']['dataset']
-    dataset_folder = cfg['data']['path']
-    categories = cfg['data']['classes']
+    method = cfg['method'] #onet
+    dataset_type = cfg['data']['dataset'] #Shapes3D
+    dataset_folder = cfg['data']['path'] #data/ShapeNet
+    categories = cfg['data']['classes'] #null
 
     # Get split
     splits = {
-        'train': cfg['data']['train_split'],
-        'val': cfg['data']['val_split'],
-        'test': cfg['data']['test_split'],
+        'train': cfg['data']['train_split'], #train
+        'val': cfg['data']['val_split'], #val
+        'test': cfg['data']['test_split'], #test
     }
 
-    split = splits[mode]
+    split = splits[mode] #Retrieve split 
 
     # Create dataset
     if dataset_type == 'Shapes3D':
         # Dataset fields
         # Method specific fields (usually correspond to output)
+        #method_dict[method] = onet
+        #fields = onet.config.get_data_fields('train'/'val', cfg)
+        #fields = {'points': data.PointsField, 'points_iou':data.PointsField(if val)}
         fields = method_dict[method].config.get_data_fields(mode, cfg)
         # Input fields
+        # List of conditional inputs. For Imto3D Recon inputs_field= data.ImagesField (resized cropped img_tensor)
         inputs_field = get_inputs_field(mode, cfg)
+        
         if inputs_field is not None:
+            #fields = {'points': data.PointsField, 
+            # 'points_iou':data.PointsField(if val),
+            # 'inputs': data.ImagesField}
             fields['inputs'] = inputs_field
 
         if return_idx:
@@ -147,9 +155,13 @@ def get_dataset(mode, cfg, return_idx=False, return_category=False):
             fields['category'] = data.CategoryField()
 
         dataset = data.Shapes3dDataset(
-            dataset_folder, fields,
+            dataset_folder, #data/ShapeNet
+            fields,
+            #fields = {'points': data.PointsField, 
+            # 'points_iou':data.PointsField(if val),
+            # 'inputs': data.ImagesField}
             split=split,
-            categories=categories,
+            categories=categories,#null
         )
     elif dataset_type == 'kitti':
         dataset = data.KittiDataset(
@@ -181,31 +193,33 @@ def get_inputs_field(mode, cfg):
         mode (str): the mode which is used
         cfg (dict): config dictionary
     '''
-    input_type = cfg['data']['input_type']
-    with_transforms = cfg['data']['with_transforms']
+    input_type = cfg['data']['input_type'] #img
+    with_transforms = cfg['data']['with_transforms'] #False
 
     if input_type is None:
         inputs_field = None
     elif input_type == 'img':
-        if mode == 'train' and cfg['data']['img_augment']:
+        if mode == 'train' and cfg['data']['img_augment']: #Resize and crops data images in training.
             resize_op = transforms.RandomResizedCrop(
                 cfg['data']['img_size'], (0.75, 1.), (1., 1.))
         else:
             resize_op = transforms.Resize((cfg['data']['img_size']))
 
+        #Image transforms 
         transform = transforms.Compose([
             resize_op, transforms.ToTensor(),
         ])
 
-        with_camera = cfg['data']['img_with_camera']
+        with_camera = cfg['data']['img_with_camera'] #False
 
         if mode == 'train':
-            random_view = True
+            random_view = True #Selects 1 random rendering img from the list of renders for each shape.
         else:
-            random_view = False
+            random_view = False#Selects the 1st random rendering img
 
         inputs_field = data.ImagesField(
-            cfg['data']['img_folder'], transform,
+            cfg['data']['img_folder'], #img_choy2016
+            transform,
             with_camera=with_camera, random_view=random_view
         )
     elif input_type == 'pointcloud':

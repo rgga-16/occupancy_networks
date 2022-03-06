@@ -63,7 +63,7 @@ class Resnet18(nn.Module):
     def forward(self, x):
         if self.normalize:
             x = normalize_imagenet(x)
-        net = self.features(x)
+        net = self.features(x) #x(3,224,224) ==> net(1,512)
         out = self.fc(net)
         return out
 

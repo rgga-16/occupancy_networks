@@ -2,7 +2,7 @@ method: onet
 data:
   path: data/ShapeNet
   img_folder: img_choy2016
-  img_size: 224 
+  img_size: 224
   points_subsample: 2048 
 model:
   encoder_latent: null
@@ -26,6 +26,6 @@ generation:
   refine: false
   n_x: 128
   n_z: 1
-  resolution_0: 32 
+  resolution_0: 32
   upsampling_steps: 2
 

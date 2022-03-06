@@ -61,6 +61,7 @@ class Generator3D(object):
         device = self.device
         stats_dict = {}
 
+        # Second arg in .get() is default value if data['inputs'] is not available.
         inputs = data.get('inputs', torch.empty(1, 0)).to(device)
         kwargs = {}
 
@@ -105,27 +106,29 @@ class Generator3D(object):
             pointsf = box_size * make_3d_grid(
                 (-0.5,)*3, (0.5,)*3, (nx,)*3
             )
+            #values is the occupancy probabilities
             values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
             value_grid = values.reshape(nx, nx, nx)
         else:
+            #Initializes mesh extractor
             mesh_extractor = MISE(
                 self.resolution0, self.upsampling_steps, threshold)
 
-            points = mesh_extractor.query()
+            points = mesh_extractor.query() #points(n_points,T=3), range(0,128)
 
             while points.shape[0] != 0:
                 # Query points
-                pointsf = torch.FloatTensor(points).to(self.device)
+                pointsf = torch.FloatTensor(points).to(self.device) #pointsf= float(points)
                 # Normalize to bounding box
-                pointsf = pointsf / mesh_extractor.resolution
-                pointsf = box_size * (pointsf - 0.5)
+                pointsf = pointsf / mesh_extractor.resolution #range(0,128) => range(0,1)
+                pointsf = box_size * (pointsf - 0.5)#range(0,1) => range(-0.55,0.55)
                 # Evaluate model and update
-                values = self.eval_points(
-                    pointsf, z, c, **kwargs).cpu().numpy()
+                values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()#values(n_points)
                 values = values.astype(np.float64)
                 mesh_extractor.update(points, values)
                 points = mesh_extractor.query()
 
+            #Converts list of occupancies to an occupancy grid
             value_grid = mesh_extractor.to_dense()
 
         # Extract mesh
@@ -148,7 +151,10 @@ class Generator3D(object):
         for pi in p_split:
             pi = pi.unsqueeze(0).to(self.device)
             with torch.no_grad():
-                occ_hat = self.model.decode(pi, z, c, **kwargs).logits
+                occ_hat = self.model.decode(pi, z, c, **kwargs).logits #occ_hat(1,n_points)
+                #occ_hat range(-200,3) (??)
+                occ_max = torch.max(occ_hat)
+                occ_min = torch.min(occ_hat)
 
             occ_hats.append(occ_hat.squeeze(0).detach().cpu())
 

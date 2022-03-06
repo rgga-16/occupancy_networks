@@ -74,7 +74,7 @@ class SubsamplePoints(object):
             data (dictionary): data dictionary
         '''
         points = data[None]
-        occ = data['occ']
+        occ = data['occ'] #
 
         data_out = data.copy()
         if isinstance(self.N, int):

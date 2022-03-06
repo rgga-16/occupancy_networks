@@ -58,7 +58,11 @@ class OccupancyNetwork(nn.Module):
             inputs (tensor): conditioning input
             sample (bool): whether to sample for z
         '''
-        batch_size = p.size(0)
+        '''
+        p()
+        inputs (image) ()
+        '''
+        batch_size = p.size(0) 
         c = self.encode_inputs(inputs)
         z = self.get_z_from_prior((batch_size,), sample=sample)
         p_r = self.decode(p, z, c, **kwargs)

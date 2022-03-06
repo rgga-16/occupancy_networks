@@ -128,24 +128,29 @@ def get_data_fields(mode, cfg):
         mode (str): the mode which is used
         cfg (dict): imported yaml config
     '''
+
+    #cfg['data']['points_subsample'] = 2048. 
+    #points_transform is a list of transformations which will be applied to the points tensor
     points_transform = data.SubsamplePoints(cfg['data']['points_subsample'])
-    with_transforms = cfg['model']['use_camera']
+    with_transforms = cfg['model']['use_camera'] #=False
 
     fields = {}
+    #fields['points'] = loads points randomly subsampled around bounding area of 3D shape.
     fields['points'] = data.PointsField(
-        cfg['data']['points_file'], points_transform,
+        cfg['data']['points_file'],  #cfg['data']['points_file']=points.npz
+        points_transform,
         with_transforms=with_transforms,
-        unpackbits=cfg['data']['points_unpackbits'],
+        unpackbits=cfg['data']['points_unpackbits'], #cfg['data']['points_unpackbits']=True
     )
 
     if mode in ('val', 'test'):
-        points_iou_file = cfg['data']['points_iou_file']
-        voxels_file = cfg['data']['voxels_file']
+        points_iou_file = cfg['data']['points_iou_file']#cfg['data']['points_iou_file']=points.npz
+        voxels_file = cfg['data']['voxels_file']#=model.binvox
         if points_iou_file is not None:
             fields['points_iou'] = data.PointsField(
-                points_iou_file,
-                with_transforms=with_transforms,
-                unpackbits=cfg['data']['points_unpackbits'],
+                points_iou_file, #=points.npz
+                with_transforms=with_transforms, #=False
+                unpackbits=cfg['data']['points_unpackbits'], #=True
             )
         if voxels_file is not None:
             fields['voxels'] = data.VoxelsField(voxels_file)

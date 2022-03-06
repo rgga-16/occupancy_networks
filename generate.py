@@ -37,9 +37,11 @@ if vis_n_outputs is None:
     vis_n_outputs = -1
 
 # Dataset
+#Image dataset from ./demo folder
 dataset = config.get_dataset('test', cfg, return_idx=True)
 
 # Model
+
 model = config.get_model(cfg, device=device, dataset=dataset)
 
 checkpoint_io = CheckpointIO(out_dir, model=model)
@@ -153,7 +155,8 @@ for it, data in enumerate(tqdm(test_loader)):
         time_dict.update(stats_dict)
 
         # Write output
-        mesh_out_file = os.path.join(mesh_dir, '%s.off' % modelname)
+        # mesh_out_file = os.path.join(mesh_dir, '%s.off' % modelname)
+        mesh_out_file = os.path.join(mesh_dir, '%s.obj' % modelname)
         mesh.export(mesh_out_file)
         out_file_dict['mesh'] = mesh_out_file
 
@@ -189,7 +192,8 @@ for it, data in enumerate(tqdm(test_loader)):
     c_it = model_counter[category_id]
     if c_it < vis_n_outputs:
         # Save output files
-        img_name = '%02d.off' % c_it
+        # img_name = '%02d.off' % c_it
+        img_name = '%02d_vis.obj' % c_it
         for k, filepath in out_file_dict.items():
             ext = os.path.splitext(filepath)[1]
             out_file = os.path.join(generation_vis_dir, '%02d_%s%s'
@@ -211,3 +215,8 @@ time_df_class.to_pickle(out_time_file_class)
 time_df_class.loc['mean'] = time_df_class.mean()
 print('Timings [s]:')
 print(time_df_class)
+
+gridres = cfg['generation']['resolution_0']
+imsize = cfg['data']['img_size']
+print(f'Grid Resolution: {gridres}*{gridres}*{gridres}')
+print(f'Input Image Resolution: {imsize} pixels')
